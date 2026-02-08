@@ -1,0 +1,472 @@
+info:
+  title: trainlog-api (C + Mongoose + SQLite)
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+
+tags:
+  - name: Auth
+  - name: Exercises
+  - name: Workouts
+  - name: Stats
+  - name: Admin
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, example: user@mail.com }
+        password: { type: string, example: "123" }
+
+    SignupRequest:
+      type: object
+      required: [email, password, name, surname]
+      properties:
+        email: { type: string, example: user@mail.com }
+        password: { type: string, example: "123" }
+        name: { type: string, example: Bruno }
+        surname: { type: string, example: Silva }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        email: { type: string, example: user@mail.com }
+        role: { type: string, enum: [admin, client], example: client }
+        name: { type: string, example: Bruno }
+        surname: { type: string, example: Silva }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string, example: "0123abcd..." }
+        user:
+          $ref: "#/components/schemas/User"
+
+    MeResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+
+    Exercise:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Bench Press }
+
+    ExerciseCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, example: Bench Press }
+
+    Workout:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        user_id: { type: integer, example: 2 }
+        created_at: { type: string, example: "2026-02-07 12:00:00" }
+
+    WorkoutCreateResponse:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+
+    SetCreate:
+      type: object
+      required: [exercise_id, reps, weight]
+      properties:
+        exercise_id: { type: integer, example: 1 }
+        reps: { type: integer, example: 8 }
+        weight: { type: number, format: float, example: 80 }
+
+    AdminUserCreate:
+      type: object
+      required: [email, password, name, surname, role]
+      properties:
+        email: { type: string, example: new@mail.com }
+        password: { type: string, example: "123" }
+        name: { type: string, example: Ana }
+        surname: { type: string, example: Costa }
+        role: { type: string, enum: [admin, client], example: client }
+
+paths:
+  /health:
+    get:
+      tags: [Auth]
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+
+  /signup:
+    post:
+      tags: [Auth]
+      summary: Create account (auto-login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SignupRequest" }
+      responses:
+        "201":
+          description: Created + token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Logout (invalidate session)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "204":
+          description: No content
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeResponse" }
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /exercises:
+    get:
+      tags: [Exercises]
+      summary: List exercises (public)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Exercise" }
+
+    post:
+      tags: [Exercises]
+      summary: Create exercise (admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExerciseCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Exercise" }
+        "401":
+          description: Missing token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /exercises/{id}:
+    get:
+      tags: [Exercises]
+      summary: Get exercise by id (public)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Exercise" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+    put:
+      tags: [Exercises]
+      summary: Update exercise (admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExerciseCreate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Exercise" }
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+    delete:
+      tags: [Exercises]
+      summary: Delete exercise (admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No content
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /workouts:
+    get:
+      tags: [Workouts]
+      summary: List workouts (user)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+
+    post:
+      tags: [Workouts]
+      summary: Create workout (user)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkoutCreateResponse" }
+
+  /workouts/{id}:
+    get:
+      tags: [Workouts]
+      summary: Get workout by id (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+
+    put:
+      tags: [Workouts]
+      summary: Update workout (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+
+    delete:
+      tags: [Workouts]
+      summary: Delete workout (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No content
+
+  /workouts/{id}/sets:
+    post:
+      tags: [Workouts]
+      summary: Add set to workout (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetCreate" }
+      responses:
+        "201":
+          description: Created
+
+  /workouts/{id}/sets/{setId}:
+    put:
+      tags: [Workouts]
+      summary: Update set (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: setId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetCreate" }
+      responses:
+        "200":
+          description: OK
+
+    delete:
+      tags: [Workouts]
+      summary: Delete set (user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: setId
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No content
+
+  /stats/volume:
+    get:
+      tags: [Stats]
+      summary: Training volume stats (user)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+
+  /stats/prs:
+    get:
+      tags: [Stats]
+      summary: Personal records stats (user)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users (admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+    post:
+      tags: [Admin]
+      summary: Create user (admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUserCreate" }
+      responses:
+        "201":
+          description: Created
+        "403":
+          description: Admin only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+ 

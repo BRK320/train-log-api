@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TrainLog API - Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <div><strong>TrainLog</strong> <small class="muted">frontend simples</small></div>
+      <div><a href="dashboard.html">Dashboard</a></div>
+    </nav>
+
+    <div class="row">
+      <div class="card" style="flex:1; min-width:280px;">
+        <h3>Login</h3>
+        <div class="row">
+          <input id="loginEmail" placeholder="email" style="flex:1;">
+          <input id="loginPass" placeholder="password" type="password" style="flex:1;">
+        </div>
+        <button class="primary" id="btnLogin">Entrar</button>
+        <div id="loginMsg" class="error" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card" style="flex:1; min-width:280px;">
+        <h3>Criar conta</h3>
+        <div class="row">
+          <input id="sEmail" placeholder="email" style="flex:1;">
+          <input id="sPass" placeholder="password" type="password" style="flex:1;">
+        </div>
+        <div class="row">
+          <input id="sName" placeholder="nome" style="flex:1;">
+          <input id="sSurname" placeholder="apelido" style="flex:1;">
+        </div>
+        <button class="primary" id="btnSignup">Criar</button>
+        <div id="signupMsg" class="error" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    $("btnLogin").onclick = async () => {
+      $("loginMsg").textContent = "";
+      try {
+        await login($("loginEmail").value.trim(), $("loginPass").value);
+        location.href = "dashboard.html";
+      } catch (e) {
+        $("loginMsg").textContent = e.message;
+      }
+    };
+
+    $("btnSignup").onclick = async () => {
+      $("signupMsg").textContent = "";
+      try {
+        await signup(
+          $("sEmail").value.trim(),
+          $("sPass").value,
+          $("sName").value.trim(),
+          $("sSurname").value.trim()
+        );
+        location.href = "dashboard.html";
+      } catch (e) {
+        $("signupMsg").textContent = e.message;
+      }
+    };
+  </script>
+</body>
+</html>

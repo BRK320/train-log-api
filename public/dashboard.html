@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TrainLog - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <div>
+        <strong>TrainLog</strong>
+        <span id="roleBadge" class="badge" style="margin-left:10px;"></span>
+        <span id="userName" class="muted" style="margin-left:8px;"></span>
+      </div>
+      <div class="row">
+        <a href="admin.html" id="adminLink" style="display:none;">Admin</a>
+        <a href="index.html" id="logoutLink">Logout</a>
+      </div>
+    </nav>
+
+    <div class="card">
+      <h3>Exercícios</h3>
+      <button id="btnLoadEx" class="primary">Carregar</button>
+      <div id="exOut" style="margin-top:10px;">...</div>
+    </div>
+
+    <div class="card">
+      <h3>Workouts</h3>
+      <div class="row" style="margin-bottom:10px;">
+        <button id="btnCreateW" class="primary">Criar workout</button>
+        <button id="btnRefreshWorkouts">Atualizar lista</button>
+      </div>
+      <div id="workoutMsg" class="muted" style="margin-bottom:8px;"></div>
+      <div id="workoutsList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Detalhes do Workout</h3>
+      <div id="workoutDetail" class="muted">Clica "Ver" num workout acima.</div>
+    </div>
+
+    <div class="card">
+      <h3>Adicionar Set</h3>
+      <small class="muted">Precisas do workout_id e exercise_id</small>
+      <div class="row" style="margin-top:10px;">
+        <input id="wId" placeholder="workout_id" style="width:120px;">
+        <input id="exId" placeholder="exercise_id" style="width:120px;">
+        <input id="reps" placeholder="reps" style="width:100px;">
+        <input id="weight" placeholder="weight" style="width:100px;">
+        <button id="btnAddSet" class="primary">Adicionar</button>
+      </div>
+      <div id="setMsg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" id="editSetCard" style="display:none;">
+      <h3>Editar Set</h3>
+      <div class="row">
+        <input id="editSetWorkoutId" placeholder="workout_id" style="width:120px;" readonly>
+        <input id="editSetId" placeholder="set_id" style="width:120px;" readonly>
+        <input id="editSetExId" placeholder="exercise_id" style="width:120px;">
+        <input id="editSetReps" placeholder="reps" style="width:100px;">
+        <input id="editSetWeight" placeholder="weight" style="width:100px;">
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnUpdateSet" class="primary">Guardar</button>
+        <button id="btnCancelEditSet">Cancelar</button>
+      </div>
+      <div id="editSetMsg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Estatísticas</h3>
+      <div class="row" style="margin-bottom:10px;">
+        <button id="btnLoadVolume" class="primary">Volume</button>
+        <button id="btnLoadPRs" class="primary">PRs</button>
+      </div>
+      <div class="row">
+        <div style="flex:1; min-width:200px;">
+          <h4>Volume</h4>
+          <pre id="volumeOut">...</pre>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <h4>Personal Records</h4>
+          <pre id="prsOut">...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

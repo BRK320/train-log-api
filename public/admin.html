@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - TrainLog</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <div><strong>Admin</strong> <span class="muted">— Painel</span></div>
+      <div>
+        <a href="dashboard.html">Dashboard</a>
+        · <a href="#" id="logoutLink">Sair</a>
+      </div>
+    </nav>
+
+    <div id="msg"></div>
+
+    <div class="card">
+      <h3>Criar exercício (POST /exercises)</h3>
+      <div class="row">
+        <input id="createName" placeholder="Nome do exercício (ex: Bench Press)" />
+        <button id="btnCreate" class="primary">Criar</button>
+      </div>
+      <pre id="createOut" class="muted"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Editar exercício (PUT /exercises/:id)</h3>
+      <div class="row">
+        <input id="editId" placeholder="ID (ex: 1)" />
+        <input id="editName" placeholder="Novo nome (ex: Bench Press Incline)" />
+        <button id="btnEdit" class="primary">Guardar</button>
+      </div>
+      <pre id="editOut" class="muted"></pre>
+    </div>
+
+    <div class="card" style="border-color:#ff3636;">
+      <h3>Apagar exercício (DELETE /exercises/:id)</h3>
+      <div class="row">
+        <input id="delId" placeholder="ID (ex: 1)" />
+        <button id="btnDel" class="danger-btn">Apagar</button>
+      </div>
+      <pre id="delOut" class="muted"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Lista de Exercícios (GET /exercises)</h3>
+      <button id="btnReload" class="primary">Recarregar</button>
+      <div id="list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Criar utilizador (POST /admin/users)</h3>
+      <div class="row">
+        <input id="cuEmail" placeholder="email" style="flex:1;">
+        <input id="cuPass" placeholder="password" type="password" style="flex:1;">
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <input id="cuName" placeholder="nome" style="flex:1;">
+        <input id="cuSurname" placeholder="apelido" style="flex:1;">
+        <select id="cuRole" style="width:140px;">
+          <option value="client">client</option>
+          <option value="admin">admin</option>
+        </select>
+      </div>
+      <button id="btnCreateUser" class="primary" style="margin-top:10px;">Criar utilizador</button>
+      <pre id="createUserOut" class="muted"></pre>
+    </div>
+
+    <div class="card">
+      <h3>Utilizadores (GET /admin/users)</h3>
+      <button id="btnLoadUsers" class="primary">Recarregar</button>
+      <div id="usersList" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
