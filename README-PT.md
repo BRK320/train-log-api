@@ -74,7 +74,10 @@ gcc (Get-ChildItem src\*.c) -o api.exe -lws2_32 -lsqlite3 -lbcrypt
 
 #### A base de dados SQLite é criada em:
 - db/gym.db
-
+  
+---
+# Credenciais Administrador (Pré-definidas)
+admin@local:admin
 ---
 
 # Exemplos (curl)
